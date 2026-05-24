@@ -91,16 +91,16 @@ def job_fetch_prices():
 
 
 # ═══════════════════════════════════════════════════════════════════
-# JOB 2: Retrain Models (every Sunday at 2 AM)
+# JOB 2: Retrain Models (Every night at 2 AM)
 # ═══════════════════════════════════════════════════════════════════
 
 def job_retrain_models():
     """
     Retrain all AI models with newly accumulated data.
 
-    Runs every Sunday at 2:00 AM.
-    Why Sunday 2 AM? Low traffic, mandis are often closed on Sunday,
-    and we have a full week of new data to train on.
+    Runs every night at 2:00 AM.
+    Why 2 AM? Low traffic, and we have the previous day's closing prices
+    merged into the dataset for fresh daily learning.
 
     Process:
     1. Merge all CSV files in data/raw/ into master dataset
@@ -319,11 +319,11 @@ def setup_schedule():
 
     For production with Celery, use the Celery beat config below.
     """
-    # Every 4 hours: fetch live prices
-    schedule.every(4).hours.do(job_fetch_prices)
+    # Every 1 hour: fetch live prices
+    schedule.every(1).hours.do(job_fetch_prices)
 
-    # Every Sunday at 2:00 AM: retrain models
-    schedule.every().sunday.at("02:00").do(job_retrain_models)
+    # Every night at 2:00 AM: retrain models
+    schedule.every().day.at("02:00").do(job_retrain_models)
 
     # Every 30 minutes: check price alerts
     schedule.every(30).minutes.do(job_check_alerts)
@@ -343,8 +343,8 @@ def run_scheduler():
     print("⏰ KrishiMitra Scheduler — Running!")
     print("⏰" * 30)
     print(f"\n📋 Scheduled Jobs:")
-    print(f"   📥 Fetch prices:     Every 4 hours")
-    print(f"   🧠 Retrain models:   Every Sunday 2:00 AM")
+    print(f"   📥 Fetch prices:     Every 1 hour")
+    print(f"   🧠 Retrain models:   Every night 2:00 AM")
     print(f"   🔔 Check alerts:     Every 30 minutes")
     print(f"   📊 Data quality:     Every day 6:00 AM")
     print(f"\n🟢 Scheduler started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -372,13 +372,13 @@ try:
     celery_app = Celery("krishimitra", broker=REDIS_URL, backend=REDIS_URL)
 
     celery_app.conf.beat_schedule = {
-        "fetch-prices-every-4-hours": {
+        "fetch-prices-every-1-hour": {
             "task": "src.scheduler.celery_fetch_prices",
-            "schedule": crontab(minute=0, hour="*/4"),  # Every 4 hours
+            "schedule": crontab(minute=0, hour="*/1"),  # Every 1 hour
         },
-        "retrain-models-weekly": {
+        "retrain-models-daily": {
             "task": "src.scheduler.celery_retrain_models",
-            "schedule": crontab(minute=0, hour=2, day_of_week=0),  # Sunday 2 AM
+            "schedule": crontab(minute=0, hour=2),  # Daily at 2 AM
         },
         "check-alerts-every-30min": {
             "task": "src.scheduler.celery_check_alerts",

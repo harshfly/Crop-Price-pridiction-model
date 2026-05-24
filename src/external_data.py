@@ -507,13 +507,75 @@ def _crude_to_diesel_impact(crude_usd: float) -> str:
 
 
 # ═══════════════════════════════════════════════════════════════════
+# 4. AGRI-NEWS SENTIMENT ENGINE (Simulated Live Feed)
+# ═══════════════════════════════════════════════════════════════════
+
+def fetch_agri_news_sentiment() -> dict:
+    """
+    Fetch latest agricultural news and calculate sentiment score.
+    (Simulated for production demo. In real production, this connects to NewsAPI/GDELT)
+    """
+    print(f"\n📰 Fetching Agri-News Sentiment...")
+    # Simulate news sentiment between -1.0 (very bad, export bans) to 1.0 (very good, bumper crops)
+    # Most days are neutral (-0.2 to 0.2)
+    sentiment = np.random.normal(0, 0.3)
+    sentiment = max(min(sentiment, 1.0), -1.0)
+    
+    status = "NEUTRAL"
+    if sentiment > 0.5:
+        status = "HIGHLY POSITIVE (Bumper crops / subsidies expected)"
+    elif sentiment < -0.5:
+        status = "HIGHLY NEGATIVE (Export bans / shortages expected)"
+        
+    print(f"  🗞️ News Sentiment Score: {sentiment:.2f} [{status}]")
+    return {
+        "news_sentiment": sentiment,
+        "date": datetime.now().strftime("%Y-%m-%d")
+    }
+
+# ═══════════════════════════════════════════════════════════════════
+# 5. FESTIVAL CALENDAR ENGINE
+# ═══════════════════════════════════════════════════════════════════
+
+def fetch_upcoming_festivals() -> dict:
+    """
+    Calculate days until major Indian festivals.
+    Prices spike 7-10 days before major festivals due to high demand.
+    """
+    print(f"\n🎆 Checking Festival Calendar...")
+    today = datetime.now()
+    
+    # 2026/2027 Major Indian Festivals (Static demo dates)
+    festivals = [
+        datetime(2026, 11, 8),  # Diwali 2026
+        datetime(2027, 3, 22),  # Holi 2027
+        datetime(2027, 10, 29), # Diwali 2027
+    ]
+    
+    # Find next festival
+    future_fests = [f for f in festivals if f > today]
+    if future_fests:
+        next_fest = min(future_fests)
+        days_until = (next_fest - today).days
+    else:
+        days_until = 100 # No upcoming festival in near term
+        
+    print(f"  🗓️ Days until next major festival: {days_until} days")
+    return {
+        "days_to_festival": days_until,
+        "date": today.strftime("%Y-%m-%d")
+    }
+
+# ═══════════════════════════════════════════════════════════════════
 # DATA MERGING — Combine forecasts + fuel into main dataset
 # ═══════════════════════════════════════════════════════════════════
 
 def merge_external_data(price_df: pd.DataFrame,
                         weather_forecast: pd.DataFrame = None,
                         fuel_df: pd.DataFrame = None,
-                        crude_data: dict = None) -> pd.DataFrame:
+                        crude_data: dict = None,
+                        news_data: dict = None,
+                        festival_data: dict = None) -> pd.DataFrame:
     """
     Merge external data feeds into the main price DataFrame.
 
@@ -609,6 +671,17 @@ def merge_external_data(price_df: pd.DataFrame,
 
         print(f"  ✅ Crude oil data merged: ${crude:.2f}/barrel")
 
+    # ── Add News & Festival Data ──
+    if news_data:
+        df["news_sentiment"] = news_data.get("news_sentiment", 0.0)
+    elif "news_sentiment" not in df.columns:
+        df["news_sentiment"] = 0.0  # Default neutral
+        
+    if festival_data:
+        df["days_to_festival"] = festival_data.get("days_to_festival", 50)
+    elif "days_to_festival" not in df.columns:
+        df["days_to_festival"] = 50 # Default normal
+
     return df
 
 
@@ -644,18 +717,27 @@ def fetch_all_external_data(save_dir: str = "data/external") -> dict:
         print(f"  💾 Saved → {save_dir}/fuel_prices.csv")
     result["fuel"] = fuel
 
-    # 3. Crude Oil
-    print("\n[3/3] 🛢️ Crude Oil Price...")
-    crude = fetch_crude_oil_price()
-    with open(os.path.join(save_dir, "crude_oil.json"), "w") as f:
-        json.dump(crude, f, indent=2)
-    result["crude"] = crude
+    # 4. News Sentiment
+    print("\n[4/5] 📰 Agri-News Sentiment...")
+    news = fetch_agri_news_sentiment()
+    with open(os.path.join(save_dir, "news_sentiment.json"), "w") as f:
+        json.dump(news, f, indent=2)
+    result["news"] = news
+
+    # 5. Festival Calendar
+    print("\n[5/5] 🎆 Festival Calendar...")
+    festivals = fetch_upcoming_festivals()
+    with open(os.path.join(save_dir, "festival_data.json"), "w") as f:
+        json.dump(festivals, f, indent=2)
+    result["festivals"] = festivals
 
     print(f"\n{'═' * 60}")
     print(f"✅ ALL EXTERNAL DATA FETCHED!")
     print(f"  🌦️ Weather: {len(weather)} city-day forecasts")
     print(f"  ⛽ Fuel: {len(fuel)} city diesel prices")
     print(f"  🛢️ Crude: ${crude.get('crude_brent_usd', 0):.2f}/barrel")
+    print(f"  📰 News Sentiment: {news.get('news_sentiment', 0):.2f}")
+    print(f"  🎆 Days to Festival: {festivals.get('days_to_festival', 0)}")
     print(f"{'═' * 60}")
 
     return result

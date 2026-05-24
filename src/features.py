@@ -519,7 +519,9 @@ def get_feature_importance_names() -> dict:
         "crude_tier": "Crude oil price tier",
         "crude_expensive": "Crude oil expensive (future diesel hike)",
         "rupee_weak": "Weak rupee (import cost up)",
-        # Calendar
+        # Calendar & Events
         "month": "Month of year",
         "day_of_week": "Day of week",
+        "days_to_festival": "Festival proximity",
+        "news_sentiment": "Agri-News Sentiment",
     }
