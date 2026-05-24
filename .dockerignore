@@ -1,0 +1,16 @@
+venv/
+venv2/
+venv_broken/
+.vscode/
+data/
+models/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.env
+api.log
+*.log
+.git/
+.gitignore

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KrishiMitra AI — Enterprise Price Intelligence</title>
+  <meta name="description" content="AI crop price prediction for Indian agricultural markets.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Background Effects -->
+  <div class="bg-gradient-1"></div>
+  <div class="bg-gradient-2"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- Header -->
+  <header class="header slide-down">
+    <div class="header-container">
+      <div class="header-left">
+        <div class="logo-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 22l5-5"></path>
+            <path d="M22 2l-5 5"></path>
+            <path d="M12 12c-4-4-4-10-4-10s6 0 10 4 4 10 4 10-6 0-10-4z"></path>
+            <path d="M12 12c4 4 4 10 4 10s-6 0-10-4-4-10-4-10 6 0 10 4z"></path>
+          </svg>
+        </div>
+        <div class="brand">
+          <h1>KrishiMitra AI</h1>
+          <span class="badge">Global Unified Model</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="api-status" id="apiStatus">
+          <div class="pulse-dot"></div>
+          <span>API Connected</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container fade-in">
+    
+    <div class="dashboard-header">
+      <h2>Agricultural Price Intelligence</h2>
+      <p>Powered by XGBoost & LightGBM across all Indian States and Mandis</p>
+    </div>
+
+    <!-- Controls Glass Panel -->
+    <div class="glass-panel controls-panel">
+      <div class="input-group">
+        <label>Select Crop</label>
+        <div class="select-wrapper">
+          <select id="cropSelect">
+            <option value="Onion">Onion</option>
+            <option value="Tomato">Tomato</option>
+            <option value="Potato">Potato</option>
+            <option value="Wheat">Wheat</option>
+            <option value="Rice">Rice</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="input-group">
+        <label>State</label>
+        <div class="select-wrapper">
+          <select id="stateSelect">
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Assam">Assam</option>
+            <option value="Odisha">Odisha</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Mandi (Market)</label>
+        <div class="select-wrapper">
+          <select id="mandiSelect">
+            <option value="Indore">Indore</option>
+            <option value="Bhopal">Bhopal</option>
+            <option value="Nashik">Nashik</option>
+            <option value="Pune">Pune</option>
+            <option value="Kochi">Kochi</option>
+            <option value="Guwahati">Guwahati</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Forecast Days</label>
+        <div class="select-wrapper">
+          <select id="daysSelect">
+            <option value="7">7 Days</option>
+            <option value="14">14 Days</option>
+            <option value="30">30 Days</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group button-group" style="display:flex; gap:10px;">
+        <button class="btn-secondary" id="locationBtn" onclick="autoDetectLocation()" title="Find Nearest Mandi">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+        </button>
+        <button class="btn-primary" id="predictBtn" onclick="runPrediction()" style="flex:1;">
+          <span>Predict</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card glass-panel">
+        <div class="stat-icon">₹</div>
+        <p class="stat-label">Predicted Price (1 Qtl)</p>
+        <h3 class="stat-value" id="statPredicted">--</h3>
+        <p class="stat-change positive" id="statPredChange">Awaiting input</p>
+      </div>
+      
+      <div class="stat-card glass-panel">
+        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
+        <p class="stat-label">AI Confidence</p>
+        <h3 class="stat-value" id="statConfidence">--</h3>
+        <div class="progress-bar"><div class="progress-fill" id="confFill" style="width: 0%"></div></div>
+      </div>
+      
+      <div class="stat-card glass-panel">
+        <div class="stat-icon">🌦️</div>
+        <p class="stat-label">Weather Impact</p>
+        <h3 class="stat-value" id="weatherImpact" style="font-size:20px;">Nominal</h3>
+        <p class="stat-change neutral">Based on Open-Meteo</p>
+      </div>
+
+      <div class="stat-card glass-panel signal-card" id="signalContainer">
+        <div class="stat-icon" style="background:var(--bg-glass-heavy)">🎯</div>
+        <p class="stat-label">Action Signal</p>
+        <h3 class="stat-value" id="statSignal">WAIT</h3>
+        <p class="stat-change neutral" id="statSignalHint">Awaiting prediction</p>
+      </div>
+    </div>
+
+    <!-- Layout Grid: Main Chart & Sidebar -->
+    <div class="dashboard-layout">
+      
+      <!-- LEFT COLUMN -->
+      <div class="main-column">
+        
+        <!-- Price Chart Panel -->
+        <div class="chart-panel glass-panel">
+          <div class="panel-header">
+            <h3>Price Trajectory Simulation <span class="badge" id="chartBadge">v2.0</span></h3>
+            <div class="legend">
+              <span class="legend-item"><span class="legend-color historical"></span> Historical</span>
+              <span class="legend-item"><span class="legend-color forecast"></span> AI Forecast</span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="forecastChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Two Column Split: SHAP & Weather -->
+        <div class="split-grid">
+          
+          <!-- AI Deep Dive (SHAP Factors) -->
+          <div class="glass-panel shap-panel">
+            <div class="panel-header">
+              <h3>AI Deep Dive: Why is this happening?</h3>
+            </div>
+            <div class="factor-list" id="factorList">
+              <div class="factor-item neutral">
+                <span class="factor-name">Run prediction to see AI analysis</span>
+                <span class="factor-impact">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 14 Day Weather Forecast Chart -->
+          <div class="glass-panel weather-panel">
+            <div class="panel-header">
+              <h3>14-Day Microclimate Forecast</h3>
+            </div>
+            <div class="chart-container" style="height: 220px;">
+              <canvas id="weatherChart"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Nearby Mandis Table -->
+        <div class="glass-panel table-panel">
+          <div class="panel-header">
+            <h3>Nearby Mandis (Arbitrage Opportunities) <span class="badge" id="nearbyBadge">0 found</span></h3>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mandi</th>
+                  <th>Distance</th>
+                  <th>Est. Truck Cost</th>
+                  <th>Cost per Qtl</th>
+                </tr>
+              </thead>
+              <tbody id="nearbyBody">
+                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No data yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN (Sidebar) -->
+      <div class="sidebar-column">
+        
+        <!-- Live Mandi Rates -->
+        <div class="glass-panel list-panel">
+          <div class="panel-header">
+            <h3>Live Market Rates</h3>
+            <span class="badge" id="liveRatesMandi">Local</span>
+          </div>
+          <div class="live-rates-list" id="liveRatesList">
+            <div style="padding:20px;text-align:center;color:var(--text-muted)">Awaiting data</div>
+          </div>
+        </div>
+
+        <!-- Trending News -->
+        <div class="glass-panel list-panel">
+          <div class="panel-header">
+            <h3>Market News & Alerts</h3>
+          </div>
+          <div class="news-list" id="newsList">
+            <div style="padding:20px;text-align:center;color:var(--text-muted)">Awaiting news</div>
+          </div>
+        </div>
+
+        <!-- 7-Day Forecast Table -->
+        <div class="glass-panel list-panel">
+          <div class="panel-header">
+            <h3>Daily Forecast</h3>
+          </div>
+          <div class="forecast-list" id="forecastList">
+            <div style="padding:20px;text-align:center;color:var(--text-muted)">Awaiting data</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

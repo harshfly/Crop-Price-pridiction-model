@@ -1,0 +1,51 @@
+city,diesel_price,diesel_yesterday,diesel_change,date,source
+New Delhi,92.49,0.0,92.49,2026-05-24,goodreturns.in
+Kolkata,97.02,0.0,97.02,2026-05-24,goodreturns.in
+Mumbai,95.02,0.0,95.02,2026-05-24,goodreturns.in
+Chennai,96.98,-0.02,97.0,2026-05-24,goodreturns.in
+Gurgaon,92.73,-0.2,92.93,2026-05-24,goodreturns.in
+Noida,92.84,-0.19,93.03,2026-05-24,goodreturns.in
+Bangalore,95.99,0.0,95.99,2026-05-24,goodreturns.in
+Bhubaneswar,97.89,0.09,97.8,2026-05-24,goodreturns.in
+Chandigarh,86.94,0.0,86.94,2026-05-24,goodreturns.in
+Hyderabad,100.94,0.0,100.94,2026-05-24,goodreturns.in
+Jaipur,95.05,0.0,95.05,2026-05-24,goodreturns.in
+Lucknow,92.64,-0.06,92.7,2026-05-24,goodreturns.in
+Patna,96.53,-0.5,97.03,2026-05-24,goodreturns.in
+Thiruvananthapuram,101.55,0.0,101.55,2026-05-24,goodreturns.in
+Andaman & Nicobar,82.22,0.0,82.22,2026-05-24,goodreturns.in
+Andhra Pradesh,102.71,0.28,102.42999999999999,2026-05-24,goodreturns.in
+Arunachal Pradesh,84.95,0.32,84.63000000000001,2026-05-24,goodreturns.in
+Assam,94.5,-0.51,95.01,2026-05-24,goodreturns.in
+Bihar,96.53,-0.5,97.03,2026-05-24,goodreturns.in
+Chandigarh,86.94,0.0,86.94,2026-05-24,goodreturns.in
+Chhatisgarh,98.47,0.0,98.47,2026-05-24,goodreturns.in
+Dadra and Nagar Haveli and Daman and Diu,92.71,0.06,92.64999999999999,2026-05-24,goodreturns.in
+Delhi,92.49,0.0,92.49,2026-05-24,goodreturns.in
+Goa,93.91,0.66,93.25,2026-05-24,goodreturns.in
+Gujarat,95.29,-0.12,95.41000000000001,2026-05-24,goodreturns.in
+Haryana,93.23,0.0,93.23,2026-05-24,goodreturns.in
+Himachal Pradesh,91.96,-0.06,92.02,2026-05-24,goodreturns.in
+Jammu & Kashmir,90.33,0.12,90.21,2026-05-24,goodreturns.in
+Jharkhand,98.0,0.34,97.66,2026-05-24,goodreturns.in
+Karnataka,95.99,0.0,95.99,2026-05-24,goodreturns.in
+Kerala,101.55,0.0,101.55,2026-05-24,goodreturns.in
+Ladakh,93.19,1.41,91.78,2026-05-24,goodreturns.in
+Lakshadweep,100.25,0.0,100.25,2026-05-24,goodreturns.in
+Madhya Pradesh,96.85,0.0,96.85,2026-05-24,goodreturns.in
+Maharashtra,95.02,0.0,95.02,2026-05-24,goodreturns.in
+Manipur,90.03,0.12,89.91,2026-05-24,goodreturns.in
+Meghalaya,91.77,0.06,91.71,2026-05-24,goodreturns.in
+Mizoram,91.8,-0.71,92.50999999999999,2026-05-24,goodreturns.in
+Nagaland,93.19,-0.2,93.39,2026-05-24,goodreturns.in
+Odisha,97.89,0.09,97.8,2026-05-24,goodreturns.in
+Pondicherry,91.16,-0.12,91.28,2026-05-24,goodreturns.in
+Punjab,92.82,0.0,92.82,2026-05-24,goodreturns.in
+Rajasthan,95.05,0.0,95.05,2026-05-24,goodreturns.in
+Sikkim,95.15,0.0,95.15,2026-05-24,goodreturns.in
+Tamil Nadu,96.98,-0.02,97.0,2026-05-24,goodreturns.in
+Telangana,100.94,0.0,100.94,2026-05-24,goodreturns.in
+Tripura,91.23,0.0,91.23,2026-05-24,goodreturns.in
+Uttar Pradesh,92.64,-0.06,92.7,2026-05-24,goodreturns.in
+Uttarakhand,93.28,0.05,93.23,2026-05-24,goodreturns.in
+West Bengal,97.02,0.0,97.02,2026-05-24,goodreturns.in

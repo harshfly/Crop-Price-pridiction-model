@@ -1,0 +1,10 @@
+{
+  "accb455a3cb7e2cbbe065aa678ee7a4519949856e6481f385653c637e235077b": {
+    "company": "TestCorp",
+    "plan": "starter",
+    "created_at": "2026-04-29T09:25:30.581884",
+    "is_active": true,
+    "usage_today": 0,
+    "last_reset": "2026-04-29"
+  }
+}

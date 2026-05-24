@@ -1,0 +1,80 @@
+# ═══════════════════════════════════════════════════════════
+# KrishiMitra AI — Docker Compose (3 services)
+# Run:  docker-compose up -d
+# Logs: docker-compose logs -f api
+# Stop: docker-compose down
+# ═══════════════════════════════════════════════════════════
+
+version: "3.9"
+
+services:
+  # ── FastAPI Application ──────────────────────────────────
+  api:
+    build: .
+    container_name: krishimitra-api
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://krishimitra:krishimitra_pass@db:5432/krishimitra_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./models/saved:/app/models/saved    # Persist trained models
+      - ./data:/app/data                     # Access data files
+    restart: unless-stopped
+
+  # ── PostgreSQL + TimescaleDB ─────────────────────────────
+  db:
+    image: timescale/timescaledb:latest-pg15
+    container_name: krishimitra-db
+    environment:
+      POSTGRES_USER: krishimitra
+      POSTGRES_PASSWORD: krishimitra_pass
+      POSTGRES_DB: krishimitra_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data      # Persist database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U krishimitra"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Redis (for Celery task queue) ────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: krishimitra-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # ── Celery Worker (scheduled tasks) ─────────────────────
+  scheduler:
+    build: .
+    container_name: krishimitra-scheduler
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://krishimitra:krishimitra_pass@db:5432/krishimitra_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    command: >
+      celery -A src.scheduler worker --beat
+      --loglevel=info
+      --concurrency=2
+    volumes:
+      - ./models/saved:/app/models/saved
+      - ./data:/app/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    driver: local

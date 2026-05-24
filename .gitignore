@@ -1,0 +1,70 @@
+
+# ═══════════════════════════════════════════════════════════
+# KrishiMitra AI — .gitignore
+# ═══════════════════════════════════════════════════════════
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+krishimitra-env/
+.venv/
+
+# Environment variables (NEVER commit secrets!)
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Data files (too large for Git)
+data/raw/*.csv
+data/processed/*.csv
+data/external/weather/*.csv
+*.parquet
+*.feather
+
+# Trained models (too large for Git)
+models/saved/*.h5
+models/saved/*.pkl
+models/saved/*.joblib
+models/saved/*.png
+models/saved/*.json
+
+# Logs
+*.log
+api.log
+
+# Docker
+*.pid
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Coverage reports
+htmlcov/
+.coverage
+node_modules/
+venv_broken/
