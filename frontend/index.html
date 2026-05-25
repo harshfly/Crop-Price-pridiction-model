@@ -3,264 +3,237 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KrishiMitra AI — Enterprise Price Intelligence</title>
-  <meta name="description" content="AI crop price prediction for Indian agricultural markets.">
+  <title>KrishiMitra AI — Crop Price Intelligence</title>
+  <meta name="description" content="AI-powered crop price prediction for 42+ crops across 60+ Indian mandis. Live rates, forecasts, weather impact & market intelligence.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Background Effects -->
-  <div class="bg-gradient-1"></div>
-  <div class="bg-gradient-2"></div>
-  <div class="grid-overlay"></div>
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div><span class="brand-name">KrishiMitra</span><span class="brand-tag">AI</span></div>
+      </div>
+      <div class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+        <button class="nav-tab" data-tab="crops">Crops</button>
+        <button class="nav-tab" data-tab="mandis">Mandis</button>
+        <button class="nav-tab" data-tab="compare">Compare</button>
+        <button class="nav-tab" data-tab="weather">Weather</button>
+      </div>
+      <div class="nav-right">
+        <div class="api-pill" id="apiPill"><span class="pulse"></span><span id="apiLabel">Connecting...</span></div>
+      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    </div>
+  </nav>
 
-  <!-- Header -->
-  <header class="header slide-down">
-    <div class="header-container">
-      <div class="header-left">
-        <div class="logo-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 22l5-5"></path>
-            <path d="M22 2l-5 5"></path>
-            <path d="M12 12c-4-4-4-10-4-10s6 0 10 4 4 10 4 10-6 0-10-4z"></path>
-            <path d="M12 12c4 4 4 10 4 10s-6 0-10-4-4-10-4-10 6 0 10 4z"></path>
-          </svg>
-        </div>
-        <div class="brand">
-          <h1>KrishiMitra AI</h1>
-          <span class="badge">Global Unified Model</span>
+  <!-- ═══ TAB: DASHBOARD ═══ -->
+  <section class="tab-content active" id="tab-dashboard">
+    <div class="container">
+      <!-- Hero Stats -->
+      <div class="hero-stats" id="heroStats">
+        <div class="hero-stat"><div class="hs-icon">🌾</div><div class="hs-val" id="hsCrops">42</div><div class="hs-label">Crops Tracked</div></div>
+        <div class="hero-stat"><div class="hs-icon">🏪</div><div class="hs-val" id="hsMandis">60+</div><div class="hs-label">Mandis Covered</div></div>
+        <div class="hero-stat"><div class="hs-icon">🤖</div><div class="hs-val" id="hsModels">--</div><div class="hs-label">Models Loaded</div></div>
+        <div class="hero-stat"><div class="hs-icon">⏱️</div><div class="hs-val" id="hsUptime">--</div><div class="hs-label">Uptime</div></div>
+      </div>
+
+      <!-- Prediction Engine -->
+      <div class="card predict-card">
+        <div class="card-header"><h2>🔮 AI Price Prediction Engine</h2><span class="badge green">Live</span></div>
+        <div class="predict-controls">
+          <div class="ctrl-group">
+            <label>Category</label>
+            <select id="catSelect"><option value="all">All Categories</option></select>
+          </div>
+          <div class="ctrl-group">
+            <label>Crop</label>
+            <select id="cropSelect"><option value="Wheat">Wheat</option></select>
+          </div>
+          <div class="ctrl-group">
+            <label>State</label>
+            <select id="stateSelect"><option value="Madhya Pradesh">Madhya Pradesh</option></select>
+          </div>
+          <div class="ctrl-group">
+            <label>Mandi</label>
+            <select id="mandiSelect"><option value="Indore">Indore</option></select>
+          </div>
+          <div class="ctrl-group">
+            <label>Forecast</label>
+            <select id="daysSelect"><option value="7">7 Days</option><option value="14">14 Days</option><option value="30">30 Days</option></select>
+          </div>
+          <div class="ctrl-group">
+            <button class="btn-predict" id="predictBtn" onclick="runPrediction()">
+              <span>Predict</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="header-right">
-        <div class="api-status" id="apiStatus">
-          <div class="pulse-dot"></div>
-          <span>API Connected</span>
+
+      <!-- Results Row -->
+      <div class="results-grid" id="resultsGrid" style="display:none;">
+        <div class="result-card accent-emerald">
+          <div class="rc-label">Predicted Price</div>
+          <div class="rc-value" id="resPredicted">--</div>
+          <div class="rc-sub" id="resChange">per quintal</div>
+        </div>
+        <div class="result-card accent-blue">
+          <div class="rc-label">AI Confidence</div>
+          <div class="rc-value" id="resConfidence">--</div>
+          <div class="confidence-bar"><div class="conf-fill" id="confFill"></div></div>
+        </div>
+        <div class="result-card accent-amber">
+          <div class="rc-label">Action Signal</div>
+          <div class="rc-value" id="resSignal">WAIT</div>
+          <div class="rc-sub" id="resSignalHint">Awaiting prediction</div>
+        </div>
+        <div class="result-card accent-rose">
+          <div class="rc-label">Price Range</div>
+          <div class="rc-value" id="resRange">--</div>
+          <div class="rc-sub">confidence interval</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row" id="chartsRow" style="display:none;">
+        <div class="card chart-card">
+          <div class="card-header"><h3>📈 Price Forecast</h3><div class="legend"><span class="lg-item"><span class="lg-dot hist"></span>Historical</span><span class="lg-item"><span class="lg-dot fore"></span>Forecast</span></div></div>
+          <div class="chart-wrap"><canvas id="forecastChart"></canvas></div>
+        </div>
+        <div class="card factors-card">
+          <div class="card-header"><h3>🧠 Why This Prediction?</h3></div>
+          <div class="factors-list" id="factorsList"><div class="factor-empty">Run prediction to see AI analysis</div></div>
+        </div>
+      </div>
+
+      <!-- Daily Forecast + Live Rates -->
+      <div class="bottom-row" id="bottomRow" style="display:none;">
+        <div class="card">
+          <div class="card-header"><h3>📅 Daily Forecast</h3></div>
+          <div class="forecast-table" id="forecastTable"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📊 Live Market Rates</h3><span class="badge amber" id="liveCount">0 prices</span></div>
+          <div class="live-rates" id="liveRates"><div class="empty-msg">Select a crop to see live rates</div></div>
+        </div>
+      </div>
+
+      <!-- Festivals & News -->
+      <div class="info-row">
+        <div class="card">
+          <div class="card-header"><h3>🎉 Upcoming Festivals & Holidays</h3></div>
+          <div class="festival-list" id="festivalList"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📰 Market Intelligence</h3></div>
+          <div class="news-list" id="newsList"></div>
         </div>
       </div>
     </div>
-  </header>
+  </section>
 
-  <!-- Main Content -->
-  <main class="container fade-in">
-    
-    <div class="dashboard-header">
-      <h2>Agricultural Price Intelligence</h2>
-      <p>Powered by XGBoost & LightGBM across all Indian States and Mandis</p>
+  <!-- ═══ TAB: CROPS ═══ -->
+  <section class="tab-content" id="tab-crops">
+    <div class="container">
+      <div class="section-header">
+        <h2>🌱 Crop Encyclopedia</h2>
+        <p>42 crops across 7 categories with MSP data & harvest schedules</p>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search crops..." id="cropSearch" class="search-input">
+        <div class="filter-chips" id="cropFilters"></div>
+      </div>
+      <div class="crops-grid" id="cropsGrid"></div>
     </div>
+  </section>
 
-    <!-- Controls Glass Panel -->
-    <div class="glass-panel controls-panel">
-      <div class="input-group">
-        <label>Select Crop</label>
-        <div class="select-wrapper">
-          <select id="cropSelect">
-            <option value="Onion">Onion</option>
-            <option value="Tomato">Tomato</option>
-            <option value="Potato">Potato</option>
-            <option value="Wheat">Wheat</option>
-            <option value="Rice">Rice</option>
-          </select>
+  <!-- ═══ TAB: MANDIS ═══ -->
+  <section class="tab-content" id="tab-mandis">
+    <div class="container">
+      <div class="section-header">
+        <h2>🏪 Mandi Directory</h2>
+        <p>60+ agricultural markets across 15+ states with GPS coordinates</p>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search mandis..." id="mandiSearch" class="search-input">
+        <div class="filter-chips" id="mandiFilters"></div>
+      </div>
+      <div class="mandis-grid" id="mandisGrid"></div>
+    </div>
+  </section>
+
+  <!-- ═══ TAB: COMPARE ═══ -->
+  <section class="tab-content" id="tab-compare">
+    <div class="container">
+      <div class="section-header">
+        <h2>⚖️ Mandi Price Comparison</h2>
+        <p>Find the best mandi to sell your crop — includes transport costs & net profit</p>
+      </div>
+      <div class="card compare-controls">
+        <div class="predict-controls">
+          <div class="ctrl-group"><label>Crop</label><select id="cmpCrop"></select></div>
+          <div class="ctrl-group"><label>Quantity (Qtl)</label><input type="number" id="cmpQty" value="100" min="1" class="num-input"></div>
+          <div class="ctrl-group"><label>Your City</label><select id="cmpCity"></select></div>
+          <div class="ctrl-group"><button class="btn-predict" onclick="runCompare()"><span>Compare</span></button></div>
         </div>
       </div>
-      
-      <div class="input-group">
-        <label>State</label>
-        <div class="select-wrapper">
-          <select id="stateSelect">
-            <option value="Madhya Pradesh">Madhya Pradesh</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="Gujarat">Gujarat</option>
-            <option value="Punjab">Punjab</option>
-            <option value="Kerala">Kerala</option>
-            <option value="Assam">Assam</option>
-            <option value="Odisha">Odisha</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Mandi (Market)</label>
-        <div class="select-wrapper">
-          <select id="mandiSelect">
-            <option value="Indore">Indore</option>
-            <option value="Bhopal">Bhopal</option>
-            <option value="Nashik">Nashik</option>
-            <option value="Pune">Pune</option>
-            <option value="Kochi">Kochi</option>
-            <option value="Guwahati">Guwahati</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Forecast Days</label>
-        <div class="select-wrapper">
-          <select id="daysSelect">
-            <option value="7">7 Days</option>
-            <option value="14">14 Days</option>
-            <option value="30">30 Days</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-group button-group" style="display:flex; gap:10px;">
-        <button class="btn-secondary" id="locationBtn" onclick="autoDetectLocation()" title="Find Nearest Mandi">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
-        </button>
-        <button class="btn-primary" id="predictBtn" onclick="runPrediction()" style="flex:1;">
-          <span>Predict</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
-        </button>
+      <div class="card" id="compareResults" style="display:none;">
+        <div class="card-header"><h3>🏆 Best Mandi: <span id="cmpBest">--</span></h3><span class="badge green" id="cmpProfit">--</span></div>
+        <div class="compare-table" id="compareTable"></div>
       </div>
     </div>
+  </section>
 
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-      <div class="stat-card glass-panel">
-        <div class="stat-icon">₹</div>
-        <p class="stat-label">Predicted Price (1 Qtl)</p>
-        <h3 class="stat-value" id="statPredicted">--</h3>
-        <p class="stat-change positive" id="statPredChange">Awaiting input</p>
+  <!-- ═══ TAB: WEATHER ═══ -->
+  <section class="tab-content" id="tab-weather">
+    <div class="container">
+      <div class="section-header">
+        <h2>🌦️ Weather Impact Analysis</h2>
+        <p>How weather affects crop prices — temperature, rainfall & humidity forecasts</p>
       </div>
-      
-      <div class="stat-card glass-panel">
-        <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
-        <p class="stat-label">AI Confidence</p>
-        <h3 class="stat-value" id="statConfidence">--</h3>
-        <div class="progress-bar"><div class="progress-fill" id="confFill" style="width: 0%"></div></div>
+      <div class="card">
+        <div class="predict-controls">
+          <div class="ctrl-group"><label>City</label><select id="wxCity"></select></div>
+          <div class="ctrl-group"><label>Crop</label><select id="wxCrop"></select></div>
+          <div class="ctrl-group"><button class="btn-predict" onclick="fetchWeather()"><span>Analyze</span></button></div>
+        </div>
       </div>
-      
-      <div class="stat-card glass-panel">
-        <div class="stat-icon">🌦️</div>
-        <p class="stat-label">Weather Impact</p>
-        <h3 class="stat-value" id="weatherImpact" style="font-size:20px;">Nominal</h3>
-        <p class="stat-change neutral">Based on Open-Meteo</p>
-      </div>
-
-      <div class="stat-card glass-panel signal-card" id="signalContainer">
-        <div class="stat-icon" style="background:var(--bg-glass-heavy)">🎯</div>
-        <p class="stat-label">Action Signal</p>
-        <h3 class="stat-value" id="statSignal">WAIT</h3>
-        <p class="stat-change neutral" id="statSignalHint">Awaiting prediction</p>
+      <div id="weatherResults" style="display:none;">
+        <div class="results-grid">
+          <div class="result-card accent-blue"><div class="rc-label">Temperature</div><div class="rc-value" id="wxTemp">--</div></div>
+          <div class="result-card accent-emerald"><div class="rc-label">Humidity</div><div class="rc-value" id="wxHumidity">--</div></div>
+          <div class="result-card accent-amber"><div class="rc-label">Rainfall</div><div class="rc-value" id="wxRain">--</div></div>
+          <div class="result-card accent-rose"><div class="rc-label">Price Impact</div><div class="rc-value" id="wxImpact">--</div></div>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header"><h3>📊 7-Day Weather Forecast</h3></div>
+          <div class="chart-wrap"><canvas id="weatherChart"></canvas></div>
+        </div>
+        <div class="card"><div class="card-header"><h3>📝 Impact Summary</h3></div><p class="impact-text" id="wxSummary"></p></div>
       </div>
     </div>
+  </section>
 
-    <!-- Layout Grid: Main Chart & Sidebar -->
-    <div class="dashboard-layout">
-      
-      <!-- LEFT COLUMN -->
-      <div class="main-column">
-        
-        <!-- Price Chart Panel -->
-        <div class="chart-panel glass-panel">
-          <div class="panel-header">
-            <h3>Price Trajectory Simulation <span class="badge" id="chartBadge">v2.0</span></h3>
-            <div class="legend">
-              <span class="legend-item"><span class="legend-color historical"></span> Historical</span>
-              <span class="legend-item"><span class="legend-color forecast"></span> AI Forecast</span>
-            </div>
-          </div>
-          <div class="chart-container">
-            <canvas id="forecastChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Two Column Split: SHAP & Weather -->
-        <div class="split-grid">
-          
-          <!-- AI Deep Dive (SHAP Factors) -->
-          <div class="glass-panel shap-panel">
-            <div class="panel-header">
-              <h3>AI Deep Dive: Why is this happening?</h3>
-            </div>
-            <div class="factor-list" id="factorList">
-              <div class="factor-item neutral">
-                <span class="factor-name">Run prediction to see AI analysis</span>
-                <span class="factor-impact">--</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 14 Day Weather Forecast Chart -->
-          <div class="glass-panel weather-panel">
-            <div class="panel-header">
-              <h3>14-Day Microclimate Forecast</h3>
-            </div>
-            <div class="chart-container" style="height: 220px;">
-              <canvas id="weatherChart"></canvas>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Nearby Mandis Table -->
-        <div class="glass-panel table-panel">
-          <div class="panel-header">
-            <h3>Nearby Mandis (Arbitrage Opportunities) <span class="badge" id="nearbyBadge">0 found</span></h3>
-          </div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Mandi</th>
-                  <th>Distance</th>
-                  <th>Est. Truck Cost</th>
-                  <th>Cost per Qtl</th>
-                </tr>
-              </thead>
-              <tbody id="nearbyBody">
-                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No data yet</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>🌾 KrishiMitra AI v2.0 — Powering India's Agricultural Intelligence</div>
+      <div class="footer-links">
+        <a href="/docs" target="_blank">API Docs</a>
+        <a href="https://github.com/harshfly/Crop-Price-pridiction-model" target="_blank">GitHub</a>
+        <a href="https://huggingface.co/spaces/haarsh0910/krishimitra-ai" target="_blank">Hugging Face</a>
       </div>
-
-      <!-- RIGHT COLUMN (Sidebar) -->
-      <div class="sidebar-column">
-        
-        <!-- Live Mandi Rates -->
-        <div class="glass-panel list-panel">
-          <div class="panel-header">
-            <h3>Live Market Rates</h3>
-            <span class="badge" id="liveRatesMandi">Local</span>
-          </div>
-          <div class="live-rates-list" id="liveRatesList">
-            <div style="padding:20px;text-align:center;color:var(--text-muted)">Awaiting data</div>
-          </div>
-        </div>
-
-        <!-- Trending News -->
-        <div class="glass-panel list-panel">
-          <div class="panel-header">
-            <h3>Market News & Alerts</h3>
-          </div>
-          <div class="news-list" id="newsList">
-            <div style="padding:20px;text-align:center;color:var(--text-muted)">Awaiting news</div>
-          </div>
-        </div>
-
-        <!-- 7-Day Forecast Table -->
-        <div class="glass-panel list-panel">
-          <div class="panel-header">
-            <h3>Daily Forecast</h3>
-          </div>
-          <div class="forecast-list" id="forecastList">
-            <div style="padding:20px;text-align:center;color:var(--text-muted)">Awaiting data</div>
-          </div>
-        </div>
-
-      </div>
-
     </div>
+  </footer>
 
-  </main>
-
-  <script src="script.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

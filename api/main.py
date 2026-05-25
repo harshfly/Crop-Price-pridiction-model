@@ -149,7 +149,7 @@ app.include_router(router)
 
 # ── Serve Frontend Dashboard ──────────────────────────────────
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse, FileResponse
 
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.exists(frontend_dir):
@@ -160,7 +160,7 @@ if os.path.exists(frontend_dir):
 async def root():
     """Redirect to dashboard if frontend exists, else return API info."""
     if os.path.exists(os.path.join(frontend_dir, "index.html")):
-        return FileResponse(os.path.join(frontend_dir, "index.html"))
+        return RedirectResponse(url="/dashboard/")
     return {
         "name": "KrishiMitra AI API",
         "version": "2.0.0",
