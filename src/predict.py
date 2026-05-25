@@ -282,6 +282,72 @@ def predict_price(crop: str, mandi: str = "indore",
     current_price = float(filtered_df["modal_price"].iloc[-1])
     predicted_price = float(mean_pred[-1])
 
+    # Try to find a fresher real-time today's price from the database/API to align the forecast
+    real_current_price = None
+    try:
+        from api.database import SessionLocal, Price
+        db = SessionLocal()
+        latest = db.query(Price).filter(
+            Price.crop.ilike(f"%{crop}%"),
+            Price.mandi.ilike(f"%{mandi}%")
+        ).order_by(Price.date.desc()).first()
+        if latest and latest.modal_price > 0:
+            real_current_price = latest.modal_price
+        db.close()
+    except Exception:
+        pass
+
+    if real_current_price is None:
+        # Try fetching real-time from data.gov.in API
+        try:
+            import urllib.request
+            import urllib.parse
+            import json
+            
+            COMMODITY_MAPPING = {
+                "onion": "Onion",
+                "potato": "Potato",
+                "tomato": "Tomato",
+                "garlic": "Garlic",
+                "ginger": "Ginger",
+                "wheat": "Wheat",
+                "rice": "Rice",
+                "maize": "Maize",
+                "soybean": "Soyabean",
+                "mustard": "Mustard",
+                "cotton": "Cotton",
+                "chana": "Bengal Gram(Gram)(Whole)",
+                "moong": "Green Gram (Moong)(Whole)",
+            }
+            
+            params = {
+                "api-key": "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
+                "format": "json",
+                "limit": 5,
+                "filters[commodity]": COMMODITY_MAPPING.get(crop.lower(), crop.title()),
+                "filters[market]": mandi.title()
+            }
+            query_str = urllib.parse.urlencode(params)
+            url = f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?{query_str}"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=5) as response:
+                res_data = json.loads(response.read().decode('utf-8'))
+                records = res_data.get("records", [])
+                if records:
+                    real_current_price = float(records[0].get("modal_price", 0))
+        except Exception:
+            pass
+
+    if real_current_price is not None and real_current_price > 0:
+        # Align prediction starting from today's real price
+        change_pct = (predicted_price - current_price) / current_price
+        scale_factor = real_current_price / current_price
+        current_price = real_current_price
+        predicted_price = current_price * (1 + change_pct)
+        mean_pred = mean_pred * scale_factor
+        ci_low = ci_low * scale_factor
+        ci_high = ci_high * scale_factor
+
     # 4. Generate SHAP explanation
     shap_factors = generate_shap_explanation(crop, mandi, features_df, predicted_price)
 
