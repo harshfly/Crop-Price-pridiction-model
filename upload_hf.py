@@ -15,7 +15,7 @@ try:
         folder_path='.',
         repo_id='haarsh0910/krishimitra-ai',
         repo_type='space',
-        token='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',
+        token=os.environ.get('HF_TOKEN'),
         ignore_patterns=[
             '.git/*', 'venv/*', 'venv_broken/*', 
             'node_modules/*', 'saas-frontend/node_modules/*', 
