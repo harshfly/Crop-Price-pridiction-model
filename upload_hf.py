@@ -17,7 +17,7 @@ try:
         repo_type='space',
         token=os.environ.get('HF_TOKEN'),
         ignore_patterns=[
-            '.git/*', 'venv/*', 'venv_broken/*', 
+            '.git/*', '.github/*', 'venv/*', 'venv_broken/*', 
             'node_modules/*', 'saas-frontend/node_modules/*', 
             '__pycache__/*', 'data/raw/*',
             'upload_hf.py'
