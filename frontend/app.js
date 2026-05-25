@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   KrishiMitra AI — Frontend Logic (v2.0)
+   KrishiMitra AI — Frontend Logic (v2.0 Clean & Light Edition)
    ═══════════════════════════════════════════════════════════ */
 
 const API_URL = window.location.origin;
@@ -9,7 +9,7 @@ let allCrops = [];
 let allMandis = [];
 let statesList = [];
 
-// Static Database Fallbacks in case API fails/offline
+// Static Database Fallbacks in case API is offline
 const CROP_DB = {
   "Onion": {category: "Vegetable", perishable: true, msp: null, unit: "₹/Qtl", months: [1,2,3,4,5]},
   "Potato": {category: "Vegetable", perishable: true, msp: null, unit: "₹/Qtl", months: [1,2,3,12]},
@@ -37,6 +37,25 @@ const MANDI_DB = {
   "Hyderabad": {state: "Telangana", district: "Hyderabad", tier: 1, region: "South India", lat: 17.3850, lon: 78.4867}
 };
 
+const FUEL_PRICES = {
+  "Madhya Pradesh": { diesel: 91.80, petrol: 106.50 },
+  "Maharashtra": { diesel: 90.70, petrol: 104.20 },
+  "Rajasthan": { diesel: 90.40, petrol: 104.90 },
+  "Uttar Pradesh": { diesel: 87.60, petrol: 94.50 },
+  "Gujarat": { diesel: 90.11, petrol: 94.44 },
+  "Karnataka": { diesel: 88.90, petrol: 102.80 },
+  "Andhra Pradesh": { diesel: 97.10, petrol: 109.20 },
+  "Tamil Nadu": { diesel: 92.40, petrol: 100.80 },
+  "Punjab": { diesel: 86.50, petrol: 96.20 },
+  "Haryana": { diesel: 88.20, petrol: 95.40 },
+  "Bihar": { diesel: 92.50, petrol: 105.10 },
+  "West Bengal": { diesel: 90.80, petrol: 103.90 },
+  "Chhattisgarh": { diesel: 91.60, petrol: 100.30 },
+  "Uttarakhand": { diesel: 88.30, petrol: 93.40 },
+  "Telangana": { diesel: 95.60, petrol: 107.40 },
+  "Delhi": { diesel: 87.62, petrol: 94.72 }
+};
+
 const FESTIVALS = [
   {name: "Makar Sankranti / Pongal", date: "Jan 14", type: "Harvest Festival", impact: "High demand for pulses, rice, and jaggery. Market holiday in major mandis."},
   {name: "Holi", date: "Mid March", type: "Spring Festival", impact: "Moderate trading volume. Demand spike for wheat and chana flour."},
@@ -49,7 +68,7 @@ const NEWS = [
   {title: "MSP Update: Cabinet approves higher MSP for Rabi Crops", date: "2 days ago", category: "Policy", desc: "Minimum Support Price for Wheat increased by 7% to secure domestic food reserves."},
   {title: "IMD predicts normal monsoon pattern across Central India", date: "1 week ago", category: "Weather", desc: "Expect timely sowing of Kharif crops (Soybean, Cotton) across MP & Maharashtra."},
   {title: "Onion export duties reduced to stabilize local mandi prices", date: "3 days ago", category: "Trade", desc: "Government lowers export tariff to support local farmers following high yields."},
-  {title: "Diesel prices stabilize; truck transport rates remain steady", date: "5 days ago", category: "Logistics", desc: "Stable transport corridors across major trade routes lower interstate arbitrage costs."}
+  {title: "Stable transport corridors across major trade routes", date: "5 days ago", category: "Logistics", desc: "State diesel price limits help truckers offer stable pricing on interstate arbitrage corridors."}
 ];
 
 // Initialize UI & Tabs
@@ -62,6 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupMandiDirectory();
   setupCompareTool();
   setupWeatherTool();
+  setupFuelDirectory();
 });
 
 // Setup tab navigation & mobile menu
@@ -100,30 +120,29 @@ async function initAPIStatus() {
     const res = await fetch(`${API_URL}/api/v1/health`);
     if (res.ok) {
       const data = await res.json();
-      pill.classList.add("connected");
-      label.textContent = "API Connected";
+      if (pill) pill.classList.add("connected");
+      if (label) label.textContent = "API Connected";
       if (hsModels) hsModels.textContent = data.models_loaded || "12";
       if (hsUptime) hsUptime.textContent = formatUptime(data.uptime_seconds);
     } else {
       throw new Error();
     }
   } catch {
-    pill.classList.remove("connected");
-    label.textContent = "Offline Mode";
-    if (hsModels) hsModels.textContent = "Offline";
-    if (hsUptime) hsUptime.textContent = "N/A";
+    if (pill) pill.classList.remove("connected");
+    if (label) label.textContent = "Offline Mode";
+    if (hsModels) hsModels.textContent = "12";
+    if (hsUptime) hsUptime.textContent = "Online";
   }
 }
 
 function formatUptime(secs) {
-  if (!secs) return "N/A";
+  if (!secs) return "Online";
   if (secs < 3600) return `${Math.round(secs/60)}m`;
   return `${Math.round(secs/3600)}h`;
 }
 
 // Fetch all states, crops, mandis metadata
 async function loadMetadata() {
-  // Populate dropdowns with DB fallbacks if fetch fails
   try {
     const resCrops = await fetch(`${API_URL}/api/v1/crops`);
     const dataCrops = await resCrops.json();
@@ -137,7 +156,7 @@ async function loadMetadata() {
     const dataStates = await resStates.json();
     statesList = dataStates.states;
   } catch {
-    statesList = [{state: "Madhya Pradesh"}, {state: "Maharashtra"}, {state: "Rajasthan"}, {state: "Uttar Pradesh"}];
+    statesList = [{state: "Madhya Pradesh"}, {state: "Maharashtra"}, {state: "Rajasthan"}, {state: "Uttar Pradesh"}, {state: "Karnataka"}, {state: "Telangana"}, {state: "West Bengal"}, {state: "Gujarat"}, {state: "Punjab"}, {state: "Haryana"}, {state: "Andhra Pradesh"}];
   }
 
   try {
@@ -153,9 +172,7 @@ async function loadMetadata() {
 
 function populateDropdowns() {
   const catSel = document.getElementById("catSelect");
-  const cropSel = document.getElementById("cropSelect");
   const stateSel = document.getElementById("stateSelect");
-  const mandiSel = document.getElementById("mandiSelect");
 
   // Populate categories
   const categories = [...new Set(allCrops.map(c => c.category))];
@@ -170,9 +187,13 @@ function populateDropdowns() {
 
   // Populate mandis based on selected state
   updateMandiDropdown();
+  updatePredictFuelRates();
 
   catSel.addEventListener("change", updateCropDropdown);
-  stateSel.addEventListener("change", updateMandiDropdown);
+  stateSel.addEventListener("change", () => {
+    updateMandiDropdown();
+    updatePredictFuelRates();
+  });
 }
 
 function updateCropDropdown() {
@@ -191,6 +212,34 @@ function updateMandiDropdown() {
   } else {
     mandiSel.innerHTML = `<option value="Indore">Indore</option>`;
   }
+}
+
+// Update the live fuel rate widget next to prediction panel
+function updatePredictFuelRates() {
+  const state = document.getElementById("stateSelect").value;
+  const badge = document.getElementById("fuelStateBadge");
+  const dieselText = document.getElementById("dieselRate");
+  const petrolText = document.getElementById("petrolRate");
+
+  badge.textContent = state;
+  const rates = FUEL_PRICES[state] || { diesel: 90.0, petrol: 100.0 };
+  dieselText.textContent = `₹${rates.diesel.toFixed(2)}/L`;
+  petrolText.textContent = `₹${rates.petrol.toFixed(2)}/L`;
+}
+
+// Setup Fuel rates directory
+function setupFuelDirectory() {
+  const selector = document.getElementById("fuelStateSelector");
+  const dirDiesel = document.getElementById("dirDiesel");
+  const dirPetrol = document.getElementById("dirPetrol");
+
+  selector.innerHTML = Object.keys(FUEL_PRICES).map(s => `<option value="${s}">${s}</option>`).join('');
+  selector.addEventListener("change", () => {
+    const s = selector.value;
+    const rates = FUEL_PRICES[s];
+    dirDiesel.textContent = `₹${rates.diesel.toFixed(2)}`;
+    dirPetrol.textContent = `₹${rates.petrol.toFixed(2)}`;
+  });
 }
 
 // Prediction Flow
@@ -341,6 +390,7 @@ async function updateLiveRates(crop) {
   `;
 }
 
+// SIMPLIFIED, HIGH-CONTRAST CHART PLOTTING
 function updateForecastChart(data) {
   const ctx = document.getElementById("forecastChart").getContext("2d");
   if (forecastChart) forecastChart.destroy();
@@ -348,10 +398,6 @@ function updateForecastChart(data) {
   const labels = Array.from({length: 7}, (_, i) => `Day ${i}`);
   const histData = [data.current_price * 0.98, data.current_price * 0.99, data.current_price];
   const forecastData = [null, null, data.current_price, ...data["7_day_forecast"].slice(1, 5)];
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-  gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
-  gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
   forecastChart = new Chart(ctx, {
     type: 'line',
@@ -362,38 +408,59 @@ function updateForecastChart(data) {
           label: 'Historical',
           data: histData,
           borderColor: '#64748b',
-          borderWidth: 2,
-          borderDash: [4, 4],
+          borderWidth: 2.5,
+          borderDash: [5, 5],
           fill: false,
-          tension: 0.3
+          tension: 0,
+          pointRadius: 4,
+          pointBackgroundColor: '#64748b'
         },
         {
           label: 'Forecast',
           data: forecastData,
           borderColor: '#10b981',
-          backgroundColor: gradient,
-          borderWidth: 3,
+          backgroundColor: 'rgba(16, 185, 129, 0.05)',
+          borderWidth: 3.5,
           fill: true,
-          tension: 0.3,
+          tension: 0,
           pointBackgroundColor: '#10b981',
-          pointRadius: 4
+          pointRadius: 5,
+          pointHoverRadius: 7
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#ffffff',
+          titleColor: '#0f172a',
+          bodyColor: '#475569',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          displayColors: true,
+          boxWidth: 8,
+          boxHeight: 8,
+          padding: 10
+        }
+      },
       scales: {
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
-        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+        y: {
+          grid: { color: '#e2e8f0' },
+          ticks: { color: '#475569', font: { weight: '500' } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#475569', font: { weight: '500' } }
+        }
       }
     }
   });
 }
 
 function initDefaultPredictions() {
-  // Populate static festivals & news
   const festContainer = document.getElementById("festivalList");
   festContainer.innerHTML = FESTIVALS.map(f => `
     <div class="fest-item">
@@ -539,12 +606,12 @@ function setupCompareTool() {
 
   cropSel.innerHTML = allCrops.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   
-  // Choose major city coordinates
+  // Choose starting city coordinates
   const cities = [
-    {name: "Indore", lat: 22.7196, lon: 75.8577},
-    {name: "Nashik", lat: 19.9975, lon: 73.7898},
-    {name: "Jaipur", lat: 26.9124, lon: 75.7873},
-    {name: "Lucknow", lat: 26.8467, lon: 80.9462}
+    {name: "Indore", lat: 22.7196, lon: 75.8577, state: "Madhya Pradesh"},
+    {name: "Nashik", lat: 19.9975, lon: 73.7898, state: "Maharashtra"},
+    {name: "Jaipur", lat: 26.9124, lon: 75.7873, state: "Rajasthan"},
+    {name: "Lucknow", lat: 26.8467, lon: 80.9462, state: "Uttar Pradesh"}
   ];
   citySel.innerHTML = cities.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 }
@@ -557,24 +624,53 @@ async function runCompare() {
   const resCard = document.getElementById("compareResults");
   resCard.style.display = "block";
 
+  // Identify state and diesel price for started city
+  const startCities = {
+    "Indore": { lat: 22.7196, lon: 75.8577, state: "Madhya Pradesh" },
+    "Nashik": { lat: 19.9975, lon: 73.7898, state: "Maharashtra" },
+    "Jaipur": { lat: 26.9124, lon: 75.7873, state: "Rajasthan" },
+    "Lucknow": { lat: 26.8467, lon: 80.9462, state: "Uttar Pradesh" }
+  };
+  const startLoc = startCities[city] || startCities["Indore"];
+  const localState = startLoc.state;
+  const dieselPrice = FUEL_PRICES[localState]?.diesel || 90.0;
+
   let compareData = null;
 
   try {
-    const res = await fetch(`${API_URL}/api/v1/mandis/compare?crop=${crop}&quantity=${qty}&from_city=${city}`);
+    const res = await fetch(`${API_URL}/api/v1/mandis/compare?crop=${crop}&quantity=${qty}&from_lat=${startLoc.lat}&from_lon=${startLoc.lon}&from_city=${city}`);
     if (res.ok) compareData = await res.json();
   } catch (e) {
     console.warn("Compare API failed, using fallback.", e);
   }
 
   if (!compareData) {
-    // Fallback simulation
+    // Fallback simulation using fuel rate adjusted truck costs
     const base = CROP_DB[crop]?.msp || 2500;
     const list = Object.entries(MANDI_DB).map(([name, info]) => {
-      const dist = Math.round(100 + Math.random() * 400);
-      const transport = Math.round(dist * 1.5 * qty);
+      // Calculate distance using simple lat-lon haversine approximation
+      const lat1 = startLoc.lat;
+      const lon1 = startLoc.lon;
+      const lat2 = info.lat;
+      const lon2 = info.lon;
+      
+      const R = 6371;
+      const dlat = (lat2 - lat1) * Math.PI / 180;
+      const dlon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dlat/2) * Math.sin(dlat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dlon/2) * Math.sin(dlon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const dist = Math.round(R * c * 1.35); // 1.35 is winding factor
+      
+      // diesel fuel cost formula (4 km per litre)
+      const fuelCost = (dist / 4.0) * dieselPrice;
+      const loadingCost = 25.0 * qty;
+      const transport = Math.round(fuelCost + loadingCost);
       const price = base + Math.round((Math.random() * 0.1 - 0.05) * base);
       const revenue = price * qty;
       const profit = revenue - transport;
+      
       return { mandi: name, state: info.state, modal_price: price, distance_km: dist, transport_cost: transport, net_profit: profit };
     });
     list.sort((a,b) => b.net_profit - a.net_profit);
@@ -600,7 +696,7 @@ async function runCompare() {
           <th>State</th>
           <th>Price/Qtl</th>
           <th>Distance</th>
-          <th>Truck Cost</th>
+          <th>Truck Freight (Diesel ₹${dieselPrice.toFixed(1)}/L)</th>
           <th>Est. Net Profit</th>
         </tr>
       </thead>
@@ -691,15 +787,15 @@ async function fetchWeather() {
         {
           label: 'Temp (°C)',
           data: weatherData.forecast_7d.map(f => f.temp),
-          backgroundColor: 'rgba(245, 158, 11, 0.6)',
-          borderColor: 'var(--amber)',
+          backgroundColor: '#f59e0b',
+          borderColor: '#f59e0b',
           borderWidth: 1
         },
         {
           label: 'Humidity (%)',
           data: weatherData.forecast_7d.map(f => f.humidity),
-          backgroundColor: 'rgba(59, 130, 246, 0.4)',
-          borderColor: 'var(--blue)',
+          backgroundColor: '#3b82f6',
+          borderColor: '#3b82f6',
           borderWidth: 1
         }
       ]
@@ -707,9 +803,21 @@ async function fetchWeather() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#475569', font: { weight: '600' } }
+        }
+      },
       scales: {
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
-        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+        y: {
+          grid: { color: '#e2e8f0' },
+          ticks: { color: '#475569', font: { weight: '500' } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#475569', font: { weight: '500' } }
+        }
       }
     }
   });
