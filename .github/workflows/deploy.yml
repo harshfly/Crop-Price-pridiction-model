@@ -1,0 +1,20 @@
+name: Deploy to Hugging Face
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install huggingface_hub
+      - name: Upload to Hugging Face
+        run: python upload_hf.py
