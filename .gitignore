@@ -44,12 +44,12 @@ data/external/weather/*.csv
 *.parquet
 *.feather
 
-# Trained models (too large for Git)
-models/saved/*.h5
-models/saved/*.pkl
-models/saved/*.joblib
-models/saved/*.png
-models/saved/*.json
+# Trained models (allowed for HF deploy)
+# models/saved/*.h5
+# models/saved/*.pkl
+# models/saved/*.joblib
+# models/saved/*.png
+# models/saved/*.json
 
 # Logs
 *.log
