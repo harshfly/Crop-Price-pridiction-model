@@ -1,3 +1,12 @@
+---
+title: Krishimitra AI
+emoji: 🌾
+colorFrom: green
+colorTo: yellow
+sdk: docker
+pinned: false
+app_port: 7860
+---
 # 🌾 KrishiMitra AI — Crop Price Prediction
 
 An LSTM+GRU ensemble deep learning model that predicts Indian agricultural commodity prices using weather, mandi, and market data.
